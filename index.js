@@ -1,8 +1,8 @@
 let parseXlsx = require("excel");
 
 let entityColumns = [
-  "entityName",
-  "collectionName",
+  "entity",
+  "collection",
   "description",
   "isCollection",
   "collection-name",
@@ -55,42 +55,66 @@ async function main() {
     return result;
   });
 
-  let workspace = entities.find(e=> e.entity === 'workspace');
+  let workspace = entities.find((e) => e.entity === "workspace");
 
+  if (workspace) {
+    const jsonSchema = {
+      entityName: workspace.entity,
+      collectionName: workspace.collection,
+      collectionSchema: {
+        title:
+          workspace.collection.charAt(0).toUpperCase() +
+          workspace.collection.slice(1),
+        type: "object",
+        properties: {},
+        required: [],
+      },
+    };
 
-  console.log(workspace);
-  process.exit();
+    jsonSchema.collectionSchema.properties = workspace.properties.reduce(
+      (acc, prop) => {
+        acc[prop.name] = {
+          type: prop.type,
+          description: prop.description,
+          ...(prop.enum && { enum: prop.enum.split(",") }),
+          ...(prop.isArray && { type: "array", items: { type: prop.type } }),
+        };
+        // if required is there
+        if (prop.required === 'true') {
+          jsonSchema.collectionSchema.required.push(prop.name);
+        }
+        return acc;
+      },
+      {}
+    );
+    console.log(JSON.stringify(jsonSchema, null, 2));
+    //   console.log(workspace);
+    process.exit();
+  }
 }
 main();
 
 
 
-// async function main() {
-//   let entitiesArray = await parseXlsx.default("Schema Design Tool (1).xlsx");
-//   let propertiesArray = await parseXlsx.default("Schema Design Tool (1).xlsx", "2");
 
-//   let properties = propertiesArray.map((arr) => {
-//     let result = {};
-//     for (let i = 0; i < arr.length; i++) {
-//       result[propertyColumns[i]] = arr[i];
-//     }
-//     return result;
-//   });
+// let workspaceEntity = entities.find(e => e.entityName === 'workspaces');
 
-//   let entities = entitiesArray.map((arr) => {
-//     let result = {};
-//     for (let i = 0; i < arr.length; i++) {
-//       result[entityColumns[i]] = arr[i];
-//     }
+//   if (workspaceEntity) {
+//     const jsonSchema = {
+//       "_id": { "$oid": "<your_oid_here>" },
+//       "entityName": workspaceEntity.entityName,
+//       "collectionName": workspaceEntity.collectionName,
+//       "collectionSchema": {
+//         "title": workspaceEntity.collectionName.charAt(0).toUpperCase() + workspaceEntity.collectionName.slice(1),
+//         "type": "object",
+//         "properties": {},
+//         "required": []
+//       },
+//       "operations": ["INSERT", "GETALL", "GETBYID", "UPDATE", "DELETEBYID"],
+//       "isActive": true,
+//       "isPagination": true
+//     };
 
-//     result.properties = properties.filter((p) => p.entity === result.entity);
-//     return result;
-//   });
+//     console.log(JSON.stringify(jsonSchema, null, 2));
 
-//   let workspace = entities.find(e=> e.entity === 'workspace');
-
-
-//   console.log(workspace);
 //   process.exit();
-
-// }
