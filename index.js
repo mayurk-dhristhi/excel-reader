@@ -1,4 +1,5 @@
 let parseXlsx = require("excel");
+let fs = require("fs");
 
 let entityColumns = [
   "entity",
@@ -69,6 +70,14 @@ async function main() {
         properties: {},
         required: [],
       },
+      listConfiguration: {
+        columns: [],
+      },
+      formSchema: {
+        title: workspace.entity,
+        type: "object",
+        properties: {},
+      },
     };
 
     jsonSchema.collectionSchema.properties = workspace.properties.reduce(
@@ -80,7 +89,29 @@ async function main() {
           ...(prop.isArray && { type: "array", items: { type: prop.type } }),
         };
         // if required is there
-        if (prop.required === 'true') {
+        if (prop.required) {
+          jsonSchema.collectionSchema.required.push(prop.name);
+        }
+        return acc;
+      },
+      {}
+    );
+    jsonSchema.listConfiguration.columns = workspace.properties.map((prop) => {
+      return {
+        field: prop.name,
+        headerName: prop.description || prop.name,
+        type: prop.type,
+      };
+    });
+    jsonSchema.formSchema.properties = workspace.properties.reduce(
+      (acc, prop) => {
+        acc[prop.name] = {
+          type: prop.type,
+          description: prop.description,
+          ...(prop.enum && { enum: prop.enum.split(",") }),
+          ...(prop.isArray && { type: "array", items: { type: prop.type } }),
+        };
+        if (prop.required === "TRUE") {
           jsonSchema.collectionSchema.required.push(prop.name);
         }
         return acc;
@@ -88,14 +119,12 @@ async function main() {
       {}
     );
     console.log(JSON.stringify(jsonSchema, null, 2));
+
     //   console.log(workspace);
     process.exit();
   }
 }
 main();
-
-
-
 
 // let workspaceEntity = entities.find(e => e.entityName === 'workspaces');
 
