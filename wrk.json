@@ -1,0 +1,87 @@
+{
+  "_id": {
+    "$oid": "67a588ef80389fe124f6c61d"
+  },
+  "entityName": "workspaces",
+  "collectionName": "workspaces",
+  "collectionSchema": {
+    "title": "Workspaces",
+    "type": "object",
+    "properties": {
+      "code": {
+        "type": "string",
+        "description": "Code for Workspace Type"
+      },
+      "title": {
+        "type": "string",
+        "description": "Title for Workspace. It can be Project, Account or Opportunity Title"
+      },
+      "description": {
+        "type": "string",
+        "description": "It describes what to expect from Workspace"
+      },
+      "instanceBy": {
+        "type": "string",
+        "enum": ["TENANT", "USER", "ACCOUNT", "PROJECT", "OPPORTUNITY", "TEAM"],
+        "description": "Indicates how many unique instances can be created. If value if Tenant - only single instance can be created. If value is anything else, then no. of Workspace created can be equal to number of records in the given entity type."
+      },
+      "trackRecentlyVisited": {
+        "type": "boolean",
+        "description": "Does visit to this Workspace, needs to be tracked to be displayed in recently visited Workspace on Home Page"
+      },
+      "isPinnable": {
+        "type": "boolean",
+        "description": "Can this Workspace be pinned to Home Page"
+      },
+      "showInSidebar": {
+        "type": "boolean",
+        "description": "Should this workspace be displayed in SideBar"
+      },
+      "showOnHome": {
+        "type": "boolean",
+        "description": "Should this workspace be displayed on Home page"
+      },
+      "accessBy": {
+        "type": "string",
+        "enum": ["EVERYONE", "ROLE", "ASSOCIATION"],
+        "description": "How access to the Workspace be determined. Everyone - everyone has access to this workspace, Role - users with Role assigned to Workspace will have direct access to Workspace, Associated - users explicitly added to Workspace would have access to Workspace"
+      },
+      "allowedRoles": {
+        "type": "array",
+        "description": "If accessBy is ROLE, then list of Roles which has direct access to Workspace",
+        "items": {
+          "type": "string"
+        }
+      },
+      "icon": {
+        "type": "string",
+        "description": "Icon to be used to display to indicate Workspace"
+      },
+      "tools": {
+        "type": "array",
+        "description": "List of tools activated on Workspace",
+        "items": {
+          "type": "object"
+        }
+      }
+    },
+    "required": [
+      "_id",
+      "code",
+      "title",
+      "description",
+      "instanceBy",
+      "trackRecentlyVisited",
+      "isPinnable",
+      "showInSidebar",
+      "showOnHome",
+      "accessBy",
+      "allowedRoles",
+      "icon",
+      "tools"
+    ]
+  },
+  "operations": ["INSERT", "GETALL", "GETBYID", "UPDATE", "DELETEBYID"],
+  "isActive": true,
+  "isPagination": "true"
+}
