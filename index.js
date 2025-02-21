@@ -78,6 +78,10 @@ async function main() {
         type: "object",
         properties: {},
       },
+      uiSchema: {
+
+       
+     },
     };
 
     jsonSchema.collectionSchema.properties = workspace.properties.reduce(
@@ -96,6 +100,42 @@ async function main() {
       },
       {}
     );
+
+
+    jsonSchema.uiSchema.properties = workspace.properties.reduce((acc, prop) => {
+      let fieldConfig = {};
+    
+      if (prop.type === "string") {
+        fieldConfig["ui:widget"] = "text";  
+        fieldConfig["ui:placeholder"] = `Enter ${prop.name}`;
+      } else if (prop.type === "boolean") {
+        fieldConfig["ui:widget"] = "checkbox";  
+      } else if (prop.type === "array") {
+        fieldConfig["ui:widget"] = "textarea";
+      } else if (prop.enum) {
+        fieldConfig["ui:widget"] = "select";
+        fieldConfig["ui:options"] = {
+          enumOptions: prop.enum.split(",").map(option => ({ label: option, value: option }))
+        };
+      }
+
+      if (prop.required === "TRUE") {
+        fieldConfig["ui:required"] = true;
+      }
+    
+      if (prop.description) {
+        fieldConfig["ui:help"] = prop.description;
+      }
+    
+      if (prop["ui-schema"]) {
+        fieldConfig = { ...fieldConfig, ...JSON.parse(prop["ui-schema"]) };
+      }
+    
+      acc[prop.name] = fieldConfig;
+      return acc;
+    }, {});
+    
+
     jsonSchema.listConfiguration.columns = workspace.properties.map((prop) => {
       return {
         field: prop.name,
@@ -103,6 +143,7 @@ async function main() {
         type: prop.type,
       };
     });
+
     jsonSchema.formSchema.properties = workspace.properties.reduce(
       (acc, prop) => {
         acc[prop.name] = {
@@ -118,6 +159,7 @@ async function main() {
       },
       {}
     );
+
     console.log(JSON.stringify(jsonSchema, null, 2));
 
     //   console.log(workspace);
@@ -126,24 +168,4 @@ async function main() {
 }
 main();
 
-// let workspaceEntity = entities.find(e => e.entityName === 'workspaces');
 
-//   if (workspaceEntity) {
-//     const jsonSchema = {
-//       "_id": { "$oid": "<your_oid_here>" },
-//       "entityName": workspaceEntity.entityName,
-//       "collectionName": workspaceEntity.collectionName,
-//       "collectionSchema": {
-//         "title": workspaceEntity.collectionName.charAt(0).toUpperCase() + workspaceEntity.collectionName.slice(1),
-//         "type": "object",
-//         "properties": {},
-//         "required": []
-//       },
-//       "operations": ["INSERT", "GETALL", "GETBYID", "UPDATE", "DELETEBYID"],
-//       "isActive": true,
-//       "isPagination": true
-//     };
-
-//     console.log(JSON.stringify(jsonSchema, null, 2));
-
-//   process.exit();
